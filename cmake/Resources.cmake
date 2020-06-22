@@ -84,7 +84,7 @@ function(add_resources_library tgtname)
   set(mkcres_outfile ${mkcres_outdir}/cres_files.cmake)
 
   # script update command arguments
-  set(resources_update_args create --list-outfile "${mkcres_outfile}" --list-cmake-prefix=${tgtid}
+  set(resources_update_args create --list-outfile "${mkcres_outfile}" --list-cmake-prefix=${RES_PREFIX}
                                    --outdir "${mkcres_outdir}" --name "${RES_PREFIX}"
                                    ${RES_FILES})
 
@@ -123,8 +123,8 @@ function(add_resources_library tgtname)
   configure_file("${_Resources_Module_DIRECTORY}/Resources.cc.in" "${resources_source_file}" @ONLY)
 
   include("${mkcres_outfile}")
-  set(RESOURCES_COUNT ${${tgtname}_CRES_COUNT})
-  set(SECTION_COUNT ${${tgtname}_CRES_SECTION_COUNT})
+  set(RESOURCES_COUNT ${${RES_PREFIX}_CRES_COUNT})
+  set(SECTION_COUNT ${${RES_PREFIX}_CRES_SECTION_COUNT})
   set(PREFIX ${RES_PREFIX})
 
   configure_file("${_Resources_Module_DIRECTORY}/Resources.h.in"
@@ -138,7 +138,7 @@ function(add_resources_library tgtname)
     )
   endif()
 
-  add_library(${tgtname} STATIC EXCLUDE_FROM_ALL ${${tgtname}_CRES_SOURCE_FILES})
+  add_library(${tgtname} STATIC EXCLUDE_FROM_ALL ${${RES_PREFIX}_CRES_SOURCE_FILES})
   add_dependencies(${tgtname} ${mkcres_res_target})
   target_link_libraries(${tgtname} PUBLIC resourceslib)
   target_include_directories(${tgtname} PUBLIC "${mkcres_outdir}")
