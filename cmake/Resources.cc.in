@@ -1,0 +1,19 @@
+#include <cmake_resources/types.h>
+#include <string.h>
+
+const cresource_t* get_resource(const cresource_collection_t* c, const char* filename)
+{
+  if( c ) {
+    cresource_prefix_t **p = (cresource_prefix_t**)c->prefix_sections;
+    for( ; p && *p; ++p) {
+      if( strncmp((*p)->prefix, filename, (*p)->prefix_len) == 0 ) {
+        cresource_t **r = (cresource_t**)(*p)->resources;
+        for( ; r && *r; ++r ) {
+          if( strcmp((*r)->name, &filename[(*p)->prefix_len]) == 0 )
+            return *r;
+        } 
+      }
+    }
+  }
+  return nullptr;
+}

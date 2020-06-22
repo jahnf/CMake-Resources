@@ -1,0 +1,109 @@
+#pragma once
+
+#include <iterator>
+#include <limits>
+
+struct cresource_t {
+  const char* const prefix;
+  const char* const name;
+  const unsigned long size;
+  const unsigned char* data;
+};
+
+struct cresource_prefix_t {
+  const char* const prefix;
+  const unsigned int prefix_len;
+  const unsigned long num_resources;
+  const cresource_t* const * const resources;
+};
+
+struct cresource_collection_t {
+    const unsigned long num_prefix_sections;
+    const cresource_prefix_t* const * const prefix_sections;
+};
+
+const cresource_t* get_resource(const cresource_collection_t* c, const char* filename);
+
+class EmbeddedResources
+{
+  const cresource_collection_t* const coll_ = nullptr;
+
+public:
+  EmbeddedResources(const cresource_collection_t* c): coll_(c) {}
+
+  class iterator
+  {
+    friend class EmbeddedResources;
+    iterator(const cresource_collection_t* c, unsigned long s, unsigned long r)
+      : coll_(c), section_(s), resource_(r) {}
+
+    const cresource_collection_t* const coll_ = nullptr;
+    unsigned long section_ = std::numeric_limits<unsigned long>::max();
+    unsigned long resource_ = std::numeric_limits<unsigned long>::max();
+
+  public:
+    bool operator==(const iterator& other) const {
+      return (coll_ == other.coll_) && (section_ == other.section_) && (resource_ == other.resource_);
+    }
+    bool operator!=(const iterator& other) const {return !(*this == other);}
+
+    iterator& operator++() {
+      if (coll_ == nullptr) return *this;
+      if (section_ == std::numeric_limits<unsigned long>::max()) {
+        section_ = resource_ = 0;
+        return *this;
+      }
+      if (section_ >= coll_->num_prefix_sections) return *this;
+      const auto section = coll_->prefix_sections[section_];
+      ++resource_;
+      if (resource_ >= section->num_resources) {
+        ++section_;
+        resource_ = 0;
+      }
+      return *this;
+    }
+
+    iterator operator++(int) {
+      iterator retval = *this; 
+      ++(*this); 
+      return retval;
+    }
+
+    iterator& operator--() {
+      if (coll_ == nullptr) return *this;
+      if (section_ == std::numeric_limits<unsigned long>::max()) return *this;
+      if (resource_ == 0) 
+      {
+        if (section_ == 0) 
+          section_ = std::numeric_limits<unsigned long>::max();
+        else 
+          --section_;
+      } else {
+        --resource_;
+      }
+      return *this;
+    }
+
+    iterator operator--(int) {
+      iterator retval = *this; 
+      --(*this); 
+      return retval;
+    }
+
+    using difference_type = long;
+    using value_type = const cresource_t;
+    using pointer = const cresource_t*;
+    using reference = const cresource_t&;
+    using iterator_category = std::bidirectional_iterator_tag;  
+
+    reference operator*() const {
+      return *(coll_->prefix_sections[section_]->resources[resource_]);
+    }
+  };
+
+  iterator begin() const { return iterator(coll_, 0, 0); }
+  iterator end() const { return iterator(coll_, coll_ ? coll_->num_prefix_sections : 0, 0); }
+  const cresource_t* operator[](const char* resname) const {
+    return get_resource(coll_, resname);
+  }
+};
