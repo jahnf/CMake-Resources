@@ -1,0 +1,18 @@
+{
+  "CRES": [
+    {
+      "prefix": "sources2/",
+      "files": [
+        { "name": "example.cc" },
+        { "name": "example.cc", "alias": "example-alias.cc" }
+      ]
+    },
+    {
+      "prefix": "build-config2/",
+      "files": [
+        { "name": "CMakeLists.txt" },
+        { "name": "res-example2.json" }
+      ]
+    }
+  ]
+}

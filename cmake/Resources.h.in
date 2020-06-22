@@ -1,0 +1,11 @@
+#pragma once
+
+#include <cmake_resources/types.h>
+
+namespace @PREFIX@ {
+  constexpr unsigned resource_count = @RESOURCES_COUNT@;
+  constexpr unsigned prefix_section_count = @SECTION_COUNT@;
+  const cresource_t* get_resource(const char* filename);
+
+  const EmbeddedResources& embeddedResources();
+}
